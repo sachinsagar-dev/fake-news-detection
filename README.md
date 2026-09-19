@@ -2,11 +2,11 @@
 
 An end-to-end NLP and machine-learning project that screens English news articles as **likely real** or **likely fake**.
 
-> Important: the classifier is a screening model. It does not independently verify facts, sources, or claims.
+> **Important:** the classifier is a screening model. It does not independently verify facts, sources, or claims.
 
 ## Project scope
 
-This repository is deliberately structured as a full Data Science workflow:
+This repository is structured as a complete Data Science workflow:
 
 1. Problem definition
 2. Dataset ingestion
@@ -17,25 +17,58 @@ This repository is deliberately structured as a full Data Science workflow:
 7. Model experimentation
 8. Evaluation with accuracy, precision, recall, F1 and ROC-AUC
 9. Confusion matrix
-10. Model persistence
-11. Streamlit deployment
-12. Limitations and responsible interpretation
+10. Error analysis
+11. Model persistence
+12. Streamlit application
+13. Limitations and responsible interpretation
+
+## Project structure
+
+```text
+fake-news-detection/
+├── app.py
+├── train.py
+├── eda.py
+├── error_analysis.py
+├── requirements.txt
+├── PROJECT_PLAN.md
+├── GIT_COMMANDS_LEARNING.md
+├── src/
+│   └── text_utils.py
+├── data/
+│   └── WELFake_Dataset.csv        # not included in Git
+├── artifacts/
+│   ├── fake_news_pipeline.joblib  # generated locally
+│   ├── confusion_matrix.png
+│   ├── model_comparison.csv
+│   └── error_analysis/            # generated locally
+└── notebooks/
+    └── 01_fake_news_detection.ipynb
+```
+
+Generated datasets and ML artifacts are excluded through `.gitignore`. They can be recreated by following the dataset and training instructions below.
 
 ## Models
 
+The training script compares:
+
 - Logistic Regression
-- Linear SVM
+- Calibrated Linear SVM
 - Multinomial Naive Bayes
 
-The training script compares all three and saves the highest-F1 pipeline.
+The model with the highest F1 score is saved as the final pipeline.
 
 ## Dataset
 
-The project accepts either:
+The project accepts either of the following formats.
 
 ### Option A — WELFake
 
-Place `WELFake_Dataset.csv` in `data/`.
+Place:
+
+```text
+data/WELFake_Dataset.csv
+```
 
 Expected columns:
 
@@ -54,57 +87,77 @@ data/Fake.csv
 data/True.csv
 ```
 
-The training script automatically assigns:
+The training loader assigns:
 
 ```text
-Fake.csv → 1
-True.csv → 0
+Fake.csv → 1 (FAKE)
+True.csv → 0 (REAL)
 ```
 
+> The dataset itself is not committed to this repository. Obtain it from its legitimate public source and follow its license/attribution requirements.
+
 ## Installation
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/sachinsagar-dev/fake-news-detection.git
+cd fake-news-detection
+```
+
+### 2. Create a virtual environment
 
 ```bash
 python -m venv .venv
 ```
 
-Windows:
+### 3. Activate the environment
 
-```powershell
+Git Bash:
+
+```bash
+source .venv/Scripts/activate
+```
+
+Windows Command Prompt:
+
+```cmd
 .venv\Scripts\activate
 ```
 
-Install dependencies:
+PowerShell:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+### 4. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Train
+## Train the model
 
-WELFake:
+After placing the dataset in `data/`:
+
+### WELFake
 
 ```bash
 python train.py --dataset data/WELFake_Dataset.csv
 ```
 
-Fake/True dataset:
+### Fake.csv + True.csv
 
 ```bash
 python train.py --fake data/Fake.csv --true data/True.csv
 ```
 
-This produces:
+Training generates the model and evaluation artifacts under `artifacts/`.
 
-```text
-artifacts/
-├── fake_news_pipeline.joblib
-├── model_comparison.csv
-├── training_summary.json
-├── confusion_matrix.png
-├── *_classification_report.txt
-```
+## Exploratory Data Analysis
 
-## EDA
+Run:
 
 ```bash
 python eda.py --dataset data/WELFake_Dataset.csv
@@ -116,7 +169,29 @@ or:
 python eda.py --fake data/Fake.csv --true data/True.csv
 ```
 
-## Run the application
+EDA generates class-distribution, article-length and word-frequency outputs under `artifacts/eda/`.
+
+## Error analysis
+
+After training:
+
+```bash
+python error_analysis.py
+```
+
+This recreates the same preprocessing and stratified test split used during training and generates:
+
+```text
+artifacts/error_analysis/
+├── false_positives.csv
+├── false_negatives.csv
+├── all_misclassified.csv
+└── error_summary.json
+```
+
+This helps inspect where the classifier makes mistakes rather than relying only on aggregate accuracy.
+
+## Run the Streamlit application
 
 After training:
 
@@ -124,15 +199,63 @@ After training:
 streamlit run app.py
 ```
 
-Open the local URL shown by Streamlit.
+Open the local URL displayed by Streamlit.
 
-## Suggested interview explanation
+The application displays:
 
-### Problem
+- Likely real / likely fake classification
+- Real probability
+- Fake probability
+- Model confidence
+- Explanation of what the result means
+- The model pipeline used for classification
 
-"Online misinformation can spread quickly, so I built an NLP-based screening system that learns linguistic patterns from labelled news articles and classifies new articles as likely real or fake."
+## Reproducible workflow
 
-### Pipeline
+A fresh setup follows this sequence:
+
+```text
+Clone repository
+      ↓
+Create virtual environment
+      ↓
+Install requirements.txt
+      ↓
+Obtain dataset
+      ↓
+Run train.py
+      ↓
+Run error_analysis.py (optional)
+      ↓
+Run streamlit run app.py
+```
+
+The trained model is generated locally by `train.py`; it is intentionally not required to be committed to Git.
+
+## Results on the WELFake held-out test set
+
+The current trained models produced:
+
+| Model | Accuracy | Precision | Recall | F1 | ROC-AUC |
+|---|---:|---:|---:|---:|---:|
+| Linear SVM | 97.06% | 97.28% | 97.33% | 97.31% | 99.60% |
+| Logistic Regression | 95.89% | 96.61% | 95.83% | 96.22% | 99.26% |
+| Naive Bayes | 87.56% | 90.06% | 86.79% | 88.40% | 94.33% |
+
+The current best pipeline is the calibrated Linear SVM.
+
+### Error analysis
+
+On the same 12,646-sample held-out test set:
+
+- Correct predictions: 12,274
+- Misclassified: 372
+- False positives: 188
+- False negatives: 184
+
+The error analysis showed that some real articles with strongly opinionated or sensational language can resemble fake articles, while some fake articles written in conventional news-reporting style can resemble real articles.
+
+## Pipeline
 
 ```text
 Raw Data
@@ -156,15 +279,32 @@ Saved Pipeline
 Streamlit Application
 ```
 
-### Why TF-IDF?
+## Why TF-IDF?
 
 TF-IDF converts text into numerical features based on how important a word or n-gram is to a document relative to the corpus. It is fast, interpretable and a strong baseline for classical text classification.
 
-### Why compare multiple models?
+This project uses unigrams and bigrams with sublinear TF scaling.
 
-Different classifiers make different assumptions. Comparing them on the same held-out test set gives a more defensible model-selection process than choosing one model arbitrarily.
+## Why compare multiple models?
 
-### What would you improve?
+Different classifiers make different assumptions. Comparing them on the same held-out test set provides a more defensible model-selection process than choosing one model arbitrarily.
+
+## Limitations
+
+A high benchmark score does not mean the system can determine truth in the real world.
+
+The model:
+
+- does not verify sources or claims;
+- does not retrieve external evidence;
+- can be affected by dataset-specific language patterns;
+- can struggle with out-of-distribution articles;
+- can produce false positives and false negatives;
+- should not be treated as proof that an article is true or false.
+
+In manual robustness probes, synthetic and paraphrased articles produced less decisive and sometimes incorrect classifications. These probes are qualitative demonstrations, not a formal external accuracy benchmark.
+
+## Possible improvements
 
 - Source-separated and time-separated validation
 - Better duplicate/leakage controls
@@ -174,9 +314,29 @@ Different classifiers make different assumptions. Comparing them on the same hel
 - Human-in-the-loop fact checking
 - Monitoring for distribution drift
 
-## Limitations
+## Suggested interview explanation
 
-A high benchmark score does not mean the system can determine truth in the real world. Dataset artifacts, publisher/style leakage, topic overlap and changes in news language can affect generalization. Use the output as a screening signal, not as proof.
+### Problem
+
+> "Online misinformation can spread quickly, so I built an NLP-based screening system that learns linguistic patterns from labelled news articles and classifies new articles as likely real or fake."
+
+### End-to-end approach
+
+> "I first loaded and normalized the dataset, cleaned the text and removed very short and duplicate records. I combined the headline and article body, converted the text into TF-IDF unigram and bigram features, and compared Logistic Regression, Linear SVM and Multinomial Naive Bayes. I selected the model using held-out test-set metrics, saved the best pipeline, performed error analysis on false positives and false negatives, and exposed the model through a Streamlit interface."
+
+### Important limitation to mention
+
+> "The model is a screening classifier, not a fact-checker. Its benchmark performance is strong on the WELFake test split, but real-world generalization can be affected by dataset artifacts and changes in news style."
+
+## Git learning
+
+A practical Git command guide based on the Git/GitHub issues encountered while building this project is available in:
+
+```text
+GIT_COMMANDS_LEARNING.md
+```
+
+It covers `git status`, `git diff`, `git fetch`, `git pull`, `git push`, fast-forward updates, untracked-file conflicts, `diff -u`, and rebase.
 
 ## License / dataset attribution
 
