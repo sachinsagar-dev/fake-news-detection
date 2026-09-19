@@ -42,3 +42,6 @@ artifacts/*.png
 data/*.csv
 data/*.xlsx
 data/*.zip
+
+# Error analysis generated files
+artifacts/error_analysis/
