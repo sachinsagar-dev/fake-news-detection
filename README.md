@@ -191,6 +191,40 @@ artifacts/error_analysis/
 
 This helps inspect where the classifier makes mistakes rather than relying only on aggregate accuracy.
 
+## Deployment
+
+The Streamlit application loads the trained inference pipeline from:
+
+```text
+model/fake_news_pipeline.joblib
+```
+
+The WELFake dataset and training artifacts are not committed to Git. Before deploying, train the model locally and copy the generated pipeline into the deployment directory:
+
+```bash
+python train.py --dataset data/WELFake_Dataset.csv
+mkdir -p model
+cp artifacts/fake_news_pipeline.joblib model/fake_news_pipeline.joblib
+```
+
+On Windows PowerShell:
+
+```powershell
+python train.py --dataset data/WELFake_Dataset.csv
+New-Item -ItemType Directory -Force model
+Copy-Item artifacts/fake_news_pipeline.joblib model/fake_news_pipeline.joblib
+```
+
+Then commit and push the model file:
+
+```bash
+git add model/fake_news_pipeline.joblib
+git commit -m "Add trained model for deployment"
+git push origin main
+```
+
+For Streamlit Community Cloud, create a new app from this GitHub repository, select branch `main`, and set the entrypoint to `app.py`. The repository already contains the required `requirements.txt`.
+
 ## Run the Streamlit application
 
 After training:
