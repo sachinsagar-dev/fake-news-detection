@@ -43,7 +43,7 @@ Expected columns:
 title,text,label
 ```
 
-For the commonly distributed WELFake format, `0` represents real and `1` represents fake.
+For the WELFake format used by this project, the raw dataset uses `0` = fake and `1` = real. The project normalizes these labels during loading to `0` = real and `1` = fake.
 
 ### Option B — Fake.csv + True.csv
 
