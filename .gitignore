@@ -45,3 +45,5 @@ data/*.zip
 
 # Error analysis generated files
 artifacts/error_analysis/
+# Generated ML artifacts
+artifacts/
