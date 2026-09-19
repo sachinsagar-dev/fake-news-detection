@@ -4,7 +4,7 @@ import joblib
 import pandas as pd
 import streamlit as st
 
-MODEL_PATH = Path("artifacts/fake_news_pipeline.joblib")
+MODEL_PATH = Path("model/fake_news_pipeline.joblib")
 
 st.set_page_config(
     page_title="NewsGuard — Fake News Detection",
@@ -60,11 +60,11 @@ st.markdown(
 )
 
 if not MODEL_PATH.exists():
-    st.warning("Model is not trained yet.")
+    st.error("Trained model is missing from the deployment package.")
     st.code(
-        "python train.py --dataset data/WELFake_Dataset.csv\n"
-        "# or\n"
-        "python train.py --fake data/Fake.csv --true data/True.csv",
+        "Local setup: python train.py --dataset data/WELFake_Dataset.csv\n"
+        "Then copy artifacts/fake_news_pipeline.joblib to model/fake_news_pipeline.joblib\n"
+        "and commit the model for Streamlit deployment.",
         language="bash",
     )
     st.stop()
