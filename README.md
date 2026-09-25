@@ -1,4 +1,4 @@
-# NewsGuard — Fake News Detection System
+# NewsShield — Fake News Detection System
 
 An end-to-end NLP and machine-learning project that screens English news articles as **likely real** or **likely fake**.
 
