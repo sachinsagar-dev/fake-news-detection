@@ -7,7 +7,7 @@ import streamlit as st
 MODEL_PATH = Path("model/fake_news_pipeline.joblib")
 
 st.set_page_config(
-    page_title="NewsGuard — Fake News Detection",
+    page_title="NewsShield — Fake News Detection",
     page_icon="📰",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -78,7 +78,7 @@ def load_model():
 model = load_model()
 
 # ---------------- Sidebar navigation ----------------
-st.sidebar.title("📰 NewsGuard")
+st.sidebar.title("📰 NewsShield")
 st.sidebar.caption("NLP-based fake-news screening")
 page = st.sidebar.radio(
     "Navigation",
@@ -94,7 +94,7 @@ if page == "Dashboard":
     st.markdown(
         """
         <div class="hero">
-            <h1>📰 NewsGuard</h1>
+            <h1>📰 NewsShield</h1>
             <p>Machine-learning screening for news articles based on textual patterns.</p>
         </div>
         """,
@@ -172,7 +172,7 @@ if page == "Dashboard":
     st.divider()
     st.subheader("Important limitation")
     st.info(
-        "NewsGuard is a text-classification screening system, not a fact-checking "
+        "NewsShield is a text-classification screening system, not a fact-checking "
         "service. It does not independently verify sources, claims, dates, or "
         "external evidence. Strong benchmark performance does not guarantee "
         "correct predictions on new or time-sensitive news."
@@ -332,7 +332,7 @@ else:
     st.markdown(
         """
         <div class="hero">
-            <h1>ℹ️ About NewsGuard</h1>
+            <h1>ℹ️ About NewsShield</h1>
             <p>An end-to-end NLP classification project built for learning, evaluation and deployment.</p>
         </div>
         """,
